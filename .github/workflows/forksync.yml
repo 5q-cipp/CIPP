@@ -1,32 +1,16 @@
+name: sync-fork
 on:
   schedule:
-    - cron:  "0 0 * * *"
-    # scheduled at 07:00 every Monday and Thursday
-  workflow_dispatch:
-
+    - cron: '0 0 * * *'
+  workflow_dispatch: { }
 jobs:
-  sync_with_upstream:
+  sync:
     runs-on: ubuntu-latest
-    name: Sync master with upstream latest
-
+    permissions:
+      contents: write
     steps:
-    - name: Checkout master
-      uses: actions/checkout@v2
-      with:
-        ref: master
-        
-    - name: Pull upstream changes
-      id: sync
-      uses: aormsby/Fork-Sync-With-Upstream-action@v3.1
-      with:
-        target_sync_branch: master
-        # REQUIRED 'target_repo_token' exactly like this!
-        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
-        upstream_sync_branch: master
-        upstream_sync_repo: KelvinTegelaar/CIPP
-
-        # Set test_mode true to run tests instead of the true action!!
-        test_mode: true
-
-    - name: Timestamp
-      run: date
+      - run: gh repo sync $REPOSITORY -b $BRANCH_NAME
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH_NAME: ${{ github.ref_name }}
