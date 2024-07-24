@@ -25,10 +25,33 @@ jobs:
           git remote add upstream https://github.com/KelvinTegelaar/CIPP.git
           git fetch upstream
           git checkout main
+
+      - name: Merge changes from upstream
+        run: |
           git merge upstream/main
+        continue-on-error: true
+
+      - name: Check for merge conflicts
+        run: |
+          if git ls-files -u | grep -q '^[^ ]'; then
+            echo "Merge conflicts detected, aborting."
+            git merge --abort
+            exit 1
+          else
+            echo "No merge conflicts detected."
+          fi
 
       - name: Push changes
+        if: ${{ success() }}
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           git push origin main
+
+      - name: Display error logs
+        if: failure()
+        run: |
+          echo "The job failed with the following error:"
+          git status
+          git log -1
+          exit 1
