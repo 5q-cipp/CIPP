@@ -48,6 +48,15 @@ jobs:
         run: |
           git push origin main
 
+      - name: Display Git config
+        run: |
+          git config --list
+
+      - name: Debug Git status
+        run: |
+          git status
+          git log -1
+
       - name: Display error logs
         if: failure()
         run: |
