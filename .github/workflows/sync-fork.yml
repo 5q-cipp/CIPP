@@ -34,18 +34,17 @@ jobs:
         id: changes
         run: |
           if [ -z "$(git status --porcelain)" ]; then
-            echo "No changes to commit"
-            echo "::set-output name=changes::false"
+            echo "changes=false" >> $GITHUB_ENV
           else
-            echo "Changes detected"
-            echo "::set-output name=changes::true"
+            echo "changes=true" >> $GITHUB_ENV
           fi
 
       - name: Push changes
-        if: steps.changes.outputs.changes == 'true'
+        if: env.changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
+          git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/your-username/your-fork.git
           git push origin main
 
       - name: Display Git config
@@ -53,6 +52,3 @@ jobs:
           git config --list
 
       - name: Debug Git status
-        run: |
-          git status
-          git log -1
